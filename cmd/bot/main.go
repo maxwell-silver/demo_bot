@@ -33,13 +33,31 @@ func main() {
 			continue
 		}
 
-		log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
-
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, fmt.Sprintf("You wrote: %s", update.Message.Text))
-
-		_, err := bot.Send(msg)
-		if err != nil {
-			return
+		switch update.Message.Command() {
+		case "help":
+			helpCommand(bot, update.Message)
+		default:
+			defaultBehavior(bot, update.Message)
 		}
+	}
+}
+
+func helpCommand(bot *tgbotapi.BotAPI, inputMsg *tgbotapi.Message) {
+	msg := tgbotapi.NewMessage(inputMsg.Chat.ID, "/help - help")
+
+	_, err := bot.Send(msg)
+	if err != nil {
+		log.Panic(err)
+	}
+}
+
+func defaultBehavior(bot *tgbotapi.BotAPI, inputMsg *tgbotapi.Message) {
+	log.Printf("[%s] %s", inputMsg.From.UserName, inputMsg.Text)
+
+	msg := tgbotapi.NewMessage(inputMsg.Chat.ID, fmt.Sprintf("You wrote: %s", inputMsg.Text))
+
+	_, err := bot.Send(msg)
+	if err != nil {
+		log.Panic(err)
 	}
 }
