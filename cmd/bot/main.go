@@ -38,13 +38,6 @@ func main() {
 			continue
 		}
 
-		switch update.Message.Command() {
-		case "help":
-			c.Help(update.Message)
-		case "list":
-			c.List(update.Message)
-		default:
-			c.Default(update.Message)
-		}
+		c.HandleUpdate(update)
 	}
 }

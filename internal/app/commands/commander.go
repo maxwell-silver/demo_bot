@@ -10,12 +10,20 @@ type Commander struct {
 	productService *product.Service
 }
 
-func NewCommander(
-	bot *tgbotapi.BotAPI,
-	productService *product.Service,
-) *Commander {
+func NewCommander(bot *tgbotapi.BotAPI, productService *product.Service) *Commander {
 	return &Commander{
 		bot:            bot,
 		productService: productService,
+	}
+}
+
+func (c *Commander) HandleUpdate(update tgbotapi.Update) {
+	switch update.Message.Command() {
+	case "help":
+		c.Help(update.Message)
+	case "list":
+		c.List(update.Message)
+	default:
+		c.Default(update.Message)
 	}
 }
