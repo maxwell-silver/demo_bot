@@ -1,8 +1,8 @@
 package main
 
 import (
+	"demo_bot/internal/app/commands"
 	"demo_bot/internal/service/product"
-	"fmt"
 	"log"
 	"os"
 
@@ -28,9 +28,10 @@ func main() {
 		Timeout: 60,
 	}
 
-	updates := bot.GetUpdatesChan(u)
-
 	productService := product.NewService()
+	c := commands.NewCommander(bot, productService)
+
+	updates := bot.GetUpdatesChan(u)
 
 	for update := range updates {
 		if update.Message == nil {
@@ -39,45 +40,11 @@ func main() {
 
 		switch update.Message.Command() {
 		case "help":
-			helpCommand(bot, update.Message)
+			c.Help(update.Message)
 		case "list":
-			listCommand(bot, update.Message, productService)
+			c.List(update.Message)
 		default:
-			defaultBehavior(bot, update.Message)
+			c.Default(update.Message)
 		}
-	}
-}
-
-func helpCommand(bot *tgbotapi.BotAPI, inputMsg *tgbotapi.Message) {
-	msg := tgbotapi.NewMessage(inputMsg.Chat.ID, "/help - help")
-
-	_, err := bot.Send(msg)
-	if err != nil {
-		log.Panic(err)
-	}
-}
-
-func listCommand(bot *tgbotapi.BotAPI, inputMsg *tgbotapi.Message, productService *product.Service) {
-	outputMsg := "There are all products:\n\n"
-	products := productService.List()
-
-	for _, p := range products {
-		outputMsg += p.Title + "\n"
-	}
-
-	msg := tgbotapi.NewMessage(inputMsg.Chat.ID, outputMsg)
-
-	_, err := bot.Send(msg)
-	if err != nil {
-		log.Panic(err)
-	}
-}
-
-func defaultBehavior(bot *tgbotapi.BotAPI, inputMsg *tgbotapi.Message) {
-	msg := tgbotapi.NewMessage(inputMsg.Chat.ID, fmt.Sprintf("You wrote: %s", inputMsg.Text))
-
-	_, err := bot.Send(msg)
-	if err != nil {
-		log.Panic(err)
 	}
 }
